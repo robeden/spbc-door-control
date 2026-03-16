@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  dev:
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+      - VITE_HOST=0.0.0.0
+    command: npm run dev -- --host 0.0.0.0
+
+  npm:
+    build: .
+    volumes:
+      - .:/app
+    entrypoint: ["npm"]
+    profiles:
+      - tools
