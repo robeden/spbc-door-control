@@ -31,6 +31,7 @@ lerna-debug.log*
 
 # Sensitive files
 api.key
+.claude/
 
 # Editor directories and files
 .vscode/*

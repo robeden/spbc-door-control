@@ -12,7 +12,7 @@ class UnifiAccessService {
   constructor() {
     // Load from localStorage
     this.apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
-    this.baseUrl = localStorage.getItem(API_BASE_URL_STORAGE_KEY) || 'https://172.28.0.1:12445';
+    this.baseUrl = localStorage.getItem(API_BASE_URL_STORAGE_KEY) || import.meta.env.VITE_API_BASE_URL || 'https://172.28.0.1:12445';
   }
 
   // Check if API key is configured

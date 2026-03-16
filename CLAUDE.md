@@ -1,6 +1,6 @@
 ## Quick Reference
 
-**Current Status:** ✅ Development complete, ready for hardware testing
+**Current Status:** ✅ Tested and working with real hardware
 
 **Start Development Server:**
 ```bash
@@ -55,7 +55,7 @@ Functionality includes:
 Development approach used:
 1. ✅ Built UI with stubbed API service class
 2. ✅ Implemented real Unifi Access API integration
-3. ⏳ Testing with real hardware (current phase)
+3. ✅ Tested with real hardware — fully working
 
 
 ## Development Setup
@@ -165,55 +165,59 @@ to communicate with 172.28.0.1, you will need to ask me to connect to the VPN.
 - Added AuthenticationError custom error class
 - Included optional advanced settings (base URL configuration)
 
-**Phase 7: Real API Integration - COMPLETED ✓**
+**Phase 7: Real API Integration - COMPLETED & TESTED ✓**
 - Replaced all 5 stubbed methods in UnifiAccessService.ts with real API calls:
   - `getDoors()`: GET /api/v1/developer/doors
   - `unlock()`: PUT /api/v1/developer/doors/{id}/lock_rule with type="custom"
-  - `lock()`: PUT /api/v1/developer/doors/{id}/lock_rule with type="lock_early"
+  - `lock()`: Queries each door's rule type, then uses type="reset" (custom rules) or type="lock_early" (keep_unlock/schedule rules)
   - `getLockStatus()`: GET /api/v1/developer/doors/{id}/lock_rule for each door
   - `addTime()`: Calculates remaining time and re-applies unlock rule with extended duration
 - Removed all stubbed state (locked, unlockedDoorIds, unlockUntil, doors array)
 - All data now comes from real Unifi Access API
-- Ready for testing with VPN connection to 172.28.0.1
+- Tested with real hardware — all operations confirmed working
 - UI components unchanged - contract maintained via TypeScript interfaces
+
+**Phase 8: Hardware Testing & Bug Fixes - COMPLETED ✓**
+- Discovered API response format: all responses wrapped in `{code, data, msg}`
+- Confirmed expiration field is `ended_time` (epoch seconds), not `expires_at`
+- Confirmed locked state: `type: ""`, `ended_time: 0`
+- Confirmed `lock_early` fails (CODE_SYSTEM_ERROR) for custom rules; use `type: "reset"` instead
+- Confirmed `keep_unlock` type exists for schedule-based unlocks — requires `lock_early` to cancel
+- Fixed default door pre-selection to match by name ("Main Door") instead of hardcoded ID
+- Added error details to auth failure redirects
+- Added "Clear API Key" recovery link on error screen
+- Added "Test" link in setup advanced settings for API connectivity verification
+- Confirmed 3 active doors: Main Door, Kitchen Door, Rear Door (Rear has keep_unlock schedule)
 
 ---
 
 ## 🎯 Current Project Status
 
-**✅ DEVELOPMENT COMPLETE** - All phases finished, ready for testing with real hardware
+**✅ COMPLETE & WORKING** - Tested with real hardware, all features confirmed
 
 **What's Working:**
 - Full UI with wizard flow (Status → Unlock → Door Selection → Duration → Back to Status)
-- Real API integration with all 5 service methods implemented
+- Real API integration with all 5 service methods confirmed working
 - API key management with localStorage persistence and auto re-auth
 - Loading states, error handling, confirmation dialogs
 - Background status polling (every 15 seconds)
 - Touch-optimized tablet layout with responsive design
+- Lock/unlock of physical doors confirmed
+- "Add 15 minutes" functionality confirmed
+- Error recovery: "Clear API Key" link on error screen
+
 
 **What's Next:**
-- Testing with real Unifi Access hardware (requires VPN connection)
-- Verify API field names match assumptions (especially `expires_at`)
-- Test physical door unlock/lock operations
-- Fine-tune based on real-world behavior
+- Production deployment to tablet in kiosk mode
 
-**Known Unknowns:**
-- Exact API response format (currently assumes `expires_at` field name)
-- Whether CORS will be an issue (unlikely on local network)
-- Whether self-signed SSL cert will cause issues (should work with fetch)
-- Actual door ID for "Main Door" (currently hardcoded as '1' in App.tsx line 92)
-
-**Testing Checklist:**
-- [ ] Verify API connectivity with curl
-- [ ] Confirm door list loads from API
-- [ ] Check actual door IDs and update default selection if needed
-- [ ] Test unlock operation on physical doors
-- [ ] Test lock operation
-- [ ] Verify countdown timer accuracy
-- [ ] Test "Add 15 minutes" functionality
-- [ ] Verify status polling updates correctly
-- [ ] Test error handling (invalid API key, network errors)
-- [ ] Confirm API field names match assumptions
+**Confirmed API Facts:**
+- All responses wrapped in `{code, data, msg}` — extract `.data`
+- Expiration field: `ended_time` (Unix epoch seconds, multiply by 1000 for JS Date)
+- Locked state: `type: ""`, `ended_time: 0`
+- Our unlock rule: `type: "custom"` — cancel with `type: "reset"`
+- Schedule unlock: `type: "keep_unlock"` — cancel with `type: "lock_early"`
+- Active doors: Main Door, Kitchen Door, Rear Door (Rear has permanent keep_unlock schedule)
+- CORS: not an issue on local network ✓
 
 ## Architecture & Design
 
@@ -285,11 +289,8 @@ User sees result ← App.tsx updates state ← Promise resolves ← API Response
 
 ### Data Configuration
 - **Door data source**: Real-time from Unifi Access API (`GET /api/v1/developer/doors`)
-- **Expected doors**: Main Door, Sanctuary Door, Rear Door, Kitchen Door (actual list determined by API)
-- **Default selection**:
-  - Currently hardcoded as door ID '1' in `App.tsx` line 92
-  - ⚠️ May need update after testing to match actual "Main Door" ID from API
-  - Could also be changed to match by name instead of ID
+- **Active doors**: Main Door, Kitchen Door, Rear Door (3 doors; Rear has permanent keep_unlock schedule)
+- **Default selection**: Matches door named "Main Door" by name; falls back to first door if not found
 - **Door name display**: Names with " Door" suffix display without suffix in UI checkboxes
 - **Default unlock duration**: 1 hour (60 minutes)
 
@@ -309,36 +310,8 @@ docker compose run --rm npm <command>
 
 ## Next Steps
 
-### Testing with Real Hardware - Next Priority
-Now that API integration is complete, test with real Unifi Access system:
-
-1. **Connect to VPN** to access 172.28.0.1
-2. **Test API manually** to verify connectivity:
-   ```bash
-   curl -k https://172.28.0.1:12445/api/v1/developer/doors \
-     -H "Authorization: Bearer {api_key}"
-   ```
-3. **Start development server**: `docker compose up`
-4. **Enter API key** via setup screen on first load
-5. **Verify door list loads** from real API
-6. **Test full workflow**:
-   - Verify doors unlock when requested
-   - Verify physical doors actually unlock
-   - Check countdown timer shows correct expiration time
-   - Test "Add 15 minutes" functionality
-   - Test "Lock" button locks all doors
-   - Verify status polling updates every 15 seconds
-7. **Handle potential issues**:
-   - **CORS**: If blocked, may need to disable in browser or add proxy
-   - **SSL certificates**: Self-signed cert should work with fetch()
-   - **API field names**: May need to adjust if different than expected
-   - **Lock rule response format**: Verify `expires_at` field name matches
-8. **Fine-tune based on testing**:
-   - Adjust field names if API response differs (currently assumes `expires_at`)
-   - Verify "Main Door" ID for default selection
-   - Test edge cases (network errors, expired tokens, etc.)
-
 ### Production Deployment
+
 - Create production build: `docker compose run --rm npm run build`
 - Deploy `dist/` folder to web server or serve locally
 - Configure iPad in kiosk mode:
@@ -395,49 +368,25 @@ spbc-door-control/
 
 ## Troubleshooting
 
-### Common Issues During Testing
+### Common Issues
 
-**API Connection Errors:**
-- ✓ Check VPN is connected (required to access 172.28.0.1)
-- ✓ Verify API key is correct (test with curl first)
-- ✓ Check network connectivity to Unifi Access controller
-
-**Field Name Mismatches:**
-- If lock status shows incorrectly, check API response format
-- Current code assumes `expires_at` (snake_case) for expiration timestamp
-- May need to change to `expiresAt` (camelCase) depending on actual API response
-- Use browser DevTools Network tab to inspect actual responses
-
-**CORS Errors:**
-- Unlikely on local network, but if they occur:
-  - Option 1: Disable CORS in kiosk browser with `--disable-web-security` flag
-  - Option 2: Add simple proxy server (not ideal, adds complexity)
-- Unifi Access likely doesn't enforce CORS on local network
-
-**Self-Signed SSL Certificate Issues:**
-- Browser `fetch()` should handle self-signed certs
-- If issues occur, can configure browser to accept cert
-- In production, kiosk mode can disable cert warnings
-
-**Doors Not Unlocking:**
-- Verify door IDs are correct (check API response from GET /doors)
-- Test unlock manually with curl first
-- Check if `interval` field accepts minutes (confirmed in docs)
-- Verify lock rule is created (check with GET /doors/{id}/lock_rule)
+**API Connection Errors / Stuck on Setup Screen:**
+- Check VPN is connected (required to access 172.28.0.1)
+- Use the "Test" link in Advanced Settings to verify API connectivity
+- Use the "Clear API Key" link on the error screen to re-enter credentials
+- Auth errors (401) include the failed URL for diagnosis
+- Verify the API key matches the one in `api.key`
 
 **Lock Button Not Working:**
-- May need to adjust `lock()` implementation
-- Current implementation uses `type: "lock_early"` for all doors
-- If this doesn't work, try alternative approaches:
-  - Delete lock rules with DELETE endpoint
-  - Set interval to 0
-  - Query actual door state to determine locked status
+- `lock()` queries each door's current rule type before locking
+- Custom rules (we set): cancelled with `type: "reset"`
+- Schedule rules (keep_unlock): cancelled with `type: "lock_early"`
+- `lock_early` fails with CODE_SYSTEM_ERROR if used on custom rules — don't use it for those
 
-**Status Polling Shows Wrong State:**
-- Check `getLockStatus()` logic for parsing lock rules
-- Verify field names match actual API response
-- May need to adjust how we detect "unlocked" state
-- Check if 404 is actually returned for locked doors
+**Status Shows Wrong State:**
+- Only `type: "custom"` rules are tracked as "unlocked by us"
+- `type: "keep_unlock"` (Rear Door schedule) is intentionally ignored by getLockStatus()
+- Expiration is `ended_time` field (Unix epoch seconds)
 
 ### Debugging Tips
 
@@ -474,16 +423,20 @@ All service methods in `UnifiAccessService.ts` use real API calls via the `makeA
 - Body: `{"type": "custom", "interval": {minutes}}`
 - Uses `Promise.all()` for parallel execution
 
-**lock()** - Locks all doors (ends custom unlock early)
-- Endpoint: `PUT /api/v1/developer/doors/{id}/lock_rule` (for each door)
-- Body: `{"type": "lock_early"}`
+**lock()** - Locks doors based on their current rule type
+- Endpoint: `GET` then `PUT /api/v1/developer/doors/{id}/lock_rule` (for each door)
+- Queries each door's rule first, then sends appropriate type:
+  - `type: "custom"` → lock with `{"type": "reset"}`
+  - `type: "keep_unlock"` → lock with `{"type": "lock_early"}`
+  - `type: ""` → already locked, skip
 - Uses `Promise.all()` for parallel execution
 
 **getLockStatus()** - Queries current lock state
 - Endpoint: `GET /api/v1/developer/doors/{id}/lock_rule` (for each door)
-- Checks for active custom rules with `type: "custom"` and `expires_at` field
-- Assumes 404 or missing rule means door is locked
-- Returns earliest expiration time across all unlocked doors
+- Only tracks `type: "custom"` rules (ones we set) — ignores keep_unlock/schedule rules
+- Locked state: `type: ""` and `ended_time: 0`
+- Expiration: `ended_time` field (Unix epoch seconds, converted to JS Date via × 1000)
+- Returns earliest expiration time across all custom-unlocked doors
 
 **addTime(minutes)** - Extends unlock duration
 - Calculates remaining time from current status
@@ -519,15 +472,19 @@ All service methods in `UnifiAccessService.ts` use real API calls via the `makeA
    - Return types match types/index.ts definitions
    - UI components unaware of implementation details
 
-### Known API Assumptions
+### Confirmed API Behaviour
 
-These assumptions are based on API documentation and may need adjustment during testing:
+All confirmed through live testing:
 
-- **Expiration field name**: Currently assumes `expires_at` (snake_case)
-  - May need to change to `expiresAt` (camelCase) if API uses different format
-- **Lock rule types**: Uses `"custom"` for temporary unlock, `"lock_early"` for locking
-- **Missing rules**: Treats 404 or error responses as "door is locked"
-- **Self-signed SSL**: Browser `fetch()` should handle self-signed certs without special config
+- **Response envelope**: All responses are `{code, data, msg}` — always extract `.data`
+- **Expiration field**: `ended_time` (Unix epoch seconds) — multiply by 1000 for JS Date
+- **Locked state**: `type: ""`, `ended_time: 0`
+- **Our unlock rule**: `type: "custom"` with `interval` in minutes
+- **Schedule unlock**: `type: "keep_unlock"` (e.g. Rear Door — always unlocked by schedule)
+- **Cancelling custom rule**: `type: "reset"` ✓
+- **Cancelling schedule rule**: `type: "lock_early"` ✓
+- **`lock_early` on custom rule**: Returns CODE_SYSTEM_ERROR — do not use
+- **CORS**: Not enforced on local network ✓
 
 ## Important Notes
 
@@ -538,3 +495,5 @@ These assumptions are based on API documentation and may need adjustment during 
 - **Development server**: Runs on port 5173 via Docker (`docker compose up`)
 - **All styling**: Single App.css file for simplicity
 - **No stubbed data**: All door data and lock status comes from real API
+- **Vite allowed hosts**: `comet.local` added to `vite.config.ts` for tablet access
+- **Build-time config**: `VITE_API_BASE_URL` env var sets the default API host (falls back to `https://172.28.0.1:12445`)
