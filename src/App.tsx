@@ -93,8 +93,8 @@ function App() {
 
   // Wizard flow handlers
   const handleStartUnlock = () => {
-    // Pre-select Main Door (id: '1')
-    setSelectedDoorIds(['1']);
+    const mainDoor = doors.find(d => d.name === 'Main Door') ?? doors[0];
+    setSelectedDoorIds(mainDoor ? [mainDoor.id] : []);
     setSelectedDuration(60);
     setError(null);
     setScreen('doorSelect');
@@ -200,7 +200,10 @@ function App() {
     return (
       <div className="app loading">
         {error ? (
-          <p className="error-message">{error}</p>
+          <>
+            <p className="error-message">{error}</p>
+            <button className="link-button" onClick={handleAuthError}>Clear API Key</button>
+          </>
         ) : (
           <p>Loading...</p>
         )}
@@ -240,7 +243,7 @@ function App() {
 
       {loading && (
         <div className="loading-overlay">
-          <div className="loading-spinner">Processing...</div>
+          <div className="loading-spinner">One moment...</div>
         </div>
       )}
 

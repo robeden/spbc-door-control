@@ -70,6 +70,14 @@ export function SetupScreen({ onSave, defaultBaseUrl = 'https://172.28.0.1:12445
                   placeholder="https://172.28.0.1:12445"
                   required
                 />
+                <a
+                  href={`${baseUrl.trim()}/api/v1/developer/doors`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="link-button"
+                >
+                  Test
+                </a>
               </div>
             )}
 
