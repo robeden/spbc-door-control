@@ -5,9 +5,10 @@ import { Button } from './shared/Button';
 interface SetupScreenProps {
   onSave: (apiKey: string, baseUrl: string) => void;
   defaultBaseUrl?: string;
+  authError?: string | null;
 }
 
-export function SetupScreen({ onSave, defaultBaseUrl = 'https://172.28.0.1:12445' }: SetupScreenProps) {
+export function SetupScreen({ onSave, defaultBaseUrl = 'https://172.28.0.1:12445', authError }: SetupScreenProps) {
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState(defaultBaseUrl);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -28,9 +29,13 @@ export function SetupScreen({ onSave, defaultBaseUrl = 'https://172.28.0.1:12445
       <div className="content-section with-spacing">
         <div className="setup-container">
           <h1>Setup Required</h1>
-          <p className="setup-description">
-            Enter your Unifi Access API key to continue.
-          </p>
+          {authError ? (
+            <p className="error-message">{authError}</p>
+          ) : (
+            <p className="setup-description">
+              Enter your Unifi Access API key to continue.
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="setup-form">
             <div className="form-group">

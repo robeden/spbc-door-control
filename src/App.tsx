@@ -28,11 +28,15 @@ function App() {
   };
 
   // Handle authentication errors
-  const handleAuthError = () => {
+  const handleAuthError = (err?: unknown) => {
     unifiAccessService.clearApiKey();
     setNeedsSetup(true);
     setLockStatus(null);
-    setError('Authentication failed. Please enter your API key again.');
+    const detail = err instanceof Error ? err.message : null;
+    setError(detail
+      ? `Authentication failed: ${detail}`
+      : 'Authentication failed. Please enter your API key again.'
+    );
   };
 
   // Fetch initial data
@@ -51,9 +55,10 @@ function App() {
         setError(null);
       } catch (err) {
         if (err instanceof AuthenticationError) {
-          handleAuthError();
+          handleAuthError(err);
         } else {
-          setError('Failed to load door information. Please try again.');
+          const message = err instanceof Error ? err.message : String(err);
+          setError(`Failed to load door information: ${message}`);
           console.error('Error loading initial data:', err);
         }
       } finally {
@@ -74,7 +79,7 @@ function App() {
         setLockStatus(status);
       } catch (err) {
         if (err instanceof AuthenticationError) {
-          handleAuthError();
+          handleAuthError(err);
         } else {
           console.error('Error polling status:', err);
           // Don't set error for polling failures, just log them
@@ -114,7 +119,7 @@ function App() {
       setScreen('status');
     } catch (err) {
       if (err instanceof AuthenticationError) {
-        handleAuthError();
+        handleAuthError(err);
       } else {
         setError('Failed to unlock doors. Please try again.');
         console.error('Error unlocking doors:', err);
@@ -139,7 +144,7 @@ function App() {
       setLockStatus(status);
     } catch (err) {
       if (err instanceof AuthenticationError) {
-        handleAuthError();
+        handleAuthError(err);
       } else {
         setError('Failed to lock doors. Please try again.');
         console.error('Error locking doors:', err);
@@ -163,7 +168,7 @@ function App() {
       setLockStatus(status);
     } catch (err) {
       if (err instanceof AuthenticationError) {
-        handleAuthError();
+        handleAuthError(err);
       } else {
         setError('Failed to add time. Please try again.');
         console.error('Error adding time:', err);
@@ -185,6 +190,7 @@ function App() {
         <SetupScreen
           onSave={handleSetupComplete}
           defaultBaseUrl={unifiAccessService.getBaseUrl()}
+          authError={error}
         />
       </div>
     );
@@ -193,7 +199,11 @@ function App() {
   if (!lockStatus) {
     return (
       <div className="app loading">
-        <p>Loading...</p>
+        {error ? (
+          <p className="error-message">{error}</p>
+        ) : (
+          <p>Loading...</p>
+        )}
       </div>
     );
   }
