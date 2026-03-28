@@ -189,6 +189,22 @@ to communicate with 172.28.0.1, you will need to ask me to connect to the VPN.
 - Added "Test" link in setup advanced settings for API connectivity verification
 - Confirmed 3 active doors: Main Door, Kitchen Door, Rear Door (Rear has keep_unlock schedule)
 
+**Phase 9: Production Deployment & Polish - COMPLETED ✓**
+- GitHub Pages deployment via GitHub Actions (pushes to main auto-deploy)
+  - Live URL: `https://robeden.github.io/spbc-door-control/`
+  - Vite base path set to `/spbc-door-control/`
+  - ChurchLogo uses module import (not absolute path) so Vite resolves it correctly
+- PWA support for Safari "Add to Home Screen":
+  - `public/manifest.json` with standalone display mode
+  - `public/icon-512.png` (512×512 stained glass window icon, white background)
+  - iOS meta tags: apple-touch-icon, apple-mobile-web-app-capable, apple-mobile-web-app-title
+- CORS confirmed working from cross-origin host (comet.local → 172.28.0.1); GitHub Pages works
+- Added `cert/` to `.gitignore` to protect private key from accidental commits
+- UI: increased font and button sizes ~15-20% across the board
+- UI: lock confirmation dialog simplified — removed redundant "Are you sure?" sentence
+- Error handling: network load failure message now includes "Ensure the site certificate is trusted."
+  with a tappable link to the API base URL to allow easy cert acceptance
+
 ---
 
 ## 🎯 Current Project Status
@@ -205,10 +221,13 @@ to communicate with 172.28.0.1, you will need to ask me to connect to the VPN.
 - Lock/unlock of physical doors confirmed
 - "Add 15 minutes" functionality confirmed
 - Error recovery: "Clear API Key" link on error screen
-
+- Deployed to GitHub Pages: `https://robeden.github.io/spbc-door-control/`
+- PWA-ready for Safari "Add to Home Screen" with custom icon
 
 **What's Next:**
-- Production deployment to tablet in kiosk mode
+- Install on iPad: open `https://robeden.github.io/spbc-door-control/` in Safari → Share → Add to Home Screen
+- Enable Guided Access on iPad for kiosk mode
+- Trust the Unifi controller certificate in iPad Settings (see Troubleshooting)
 
 **Confirmed API Facts:**
 - All responses wrapped in `{code, data, msg}` — extract `.data`
@@ -312,14 +331,26 @@ docker compose run --rm npm <command>
 
 ### Production Deployment
 
-- Create production build: `docker compose run --rm npm run build`
-- Deploy `dist/` folder to web server or serve locally
-- Configure iPad in kiosk mode:
-  - Use Guided Access or kiosk app (e.g., Kiosk Pro)
-  - Set homepage to app URL
-  - Disable sleep, auto-lock
-  - Enable auto-reload on crash (if available)
-- Enter API key via setup screen on first launch
+Deployment is via GitHub Pages — push to `main` triggers an automatic build and deploy.
+
+**Live URL:** `https://robeden.github.io/spbc-door-control/`
+
+**iPad Setup:**
+1. Connect iPad to VPN
+2. Open `https://robeden.github.io/spbc-door-control/` in Safari
+3. Trust the Unifi controller certificate:
+   - Tap the "site certificate" link in the error message, or navigate to `https://172.28.0.1:12445` directly
+   - Accept the certificate warning in Safari
+   - Permanently trust it: Settings → General → About → Certificate Trust Settings → enable the certificate
+4. Return to the app and enter the API key via the Setup screen
+5. Add to Home Screen: Share → Add to Home Screen
+6. Enable Guided Access for kiosk mode
+
+**Local build (if needed):**
+```bash
+docker compose run --rm npm run build
+# Output in dist/
+```
 
 ### Future Enhancements (Optional)
 - Add audit logging of all door operations
@@ -352,7 +383,9 @@ spbc-door-control/
 │   ├── main.tsx                        # Vite entry point
 │   └── vite-env.d.ts                   # Vite types
 ├── public/
-│   └── logo.png                        # Church logo (from window_logo.png)
+│   ├── logo.png                        # Church logo (used in app UI)
+│   ├── icon-512.png                    # PWA/home screen icon (512×512)
+│   └── manifest.json                   # Web app manifest for PWA support
 ├── wireframes/                         # UI mockups (reference)
 ├── api.key                             # API token (in .gitignore)
 ├── api_reference.pdf                   # Unifi Access API docs
@@ -361,14 +394,24 @@ spbc-door-control/
 ├── tsconfig.json                       # TypeScript config
 ├── vite.config.ts                      # Vite config
 ├── Dockerfile                          # Node dev container
+├── .github/
+│   └── workflows/
+│       └── deploy.yml                  # GitHub Actions: build & deploy to Pages
 ├── docker-compose.yml                  # Dev environment
-├── .gitignore                          # Git exclusions (includes api.key)
+├── .gitignore                          # Git exclusions (includes api.key, cert/)
 └── CLAUDE.md                           # This file
 ```
 
 ## Troubleshooting
 
 ### Common Issues
+
+**"Load failed" / Certificate Error:**
+- Browser fetch is blocked by the Unifi controller's self-signed certificate
+- Tap the "site certificate" link in the error message to open the controller URL in Safari
+- Accept the certificate warning, then reload the app
+- For permanent trust on iPad: Settings → General → About → Certificate Trust Settings → enable the cert
+- Alternatively, install the cert from the `cert/` directory via AirDrop/email and enable it in Settings
 
 **API Connection Errors / Stuck on Setup Screen:**
 - Check VPN is connected (required to access 172.28.0.1)
@@ -484,7 +527,7 @@ All confirmed through live testing:
 - **Cancelling custom rule**: `type: "reset"` ✓
 - **Cancelling schedule rule**: `type: "lock_early"` ✓
 - **`lock_early` on custom rule**: Returns CODE_SYSTEM_ERROR — do not use
-- **CORS**: Not enforced on local network ✓
+- **CORS**: Not enforced — confirmed working from cross-origin host (comet.local) and GitHub Pages ✓
 
 ## Important Notes
 
@@ -496,4 +539,6 @@ All confirmed through live testing:
 - **All styling**: Single App.css file for simplicity
 - **No stubbed data**: All door data and lock status comes from real API
 - **Vite allowed hosts**: `comet.local` added to `vite.config.ts` for tablet access
+- **Vite base path**: `/spbc-door-control/` set in `vite.config.ts` for GitHub Pages
 - **Build-time config**: `VITE_API_BASE_URL` env var sets the default API host (falls back to `https://172.28.0.1:12445`)
+- **cert/ directory**: gitignored — contains the Unifi controller's self-signed certificate files; never commit
