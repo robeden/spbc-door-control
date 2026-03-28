@@ -58,7 +58,7 @@ function App() {
           handleAuthError(err);
         } else {
           const message = err instanceof Error ? err.message : String(err);
-          setError(`Failed to load door information: ${message}`);
+          setError(`Failed to load door information: ${message}. Ensure the site certificate is trusted.`);
           console.error('Error loading initial data:', err);
         }
       } finally {
@@ -254,7 +254,7 @@ function App() {
       {showLockConfirm && (
         <ConfirmDialog
           title="Lock All Doors?"
-          message="Are you sure you want to lock all doors? This will immediately secure all unlocked doors."
+          message="This will immediately secure all unlocked doors."
           onConfirm={handleLockConfirm}
           onCancel={handleLockCancel}
         />

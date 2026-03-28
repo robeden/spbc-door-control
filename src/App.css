@@ -85,7 +85,7 @@ body {
 
 /* Headings */
 h1 {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 700;
   text-align: center;
   margin: 0;
@@ -99,7 +99,7 @@ h1.selection-heading {
 }
 
 h2 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
   margin: 0;
 }
@@ -125,7 +125,7 @@ h2 {
 
 .status-text .status-word {
   display: block;
-  font-size: 56px;
+  font-size: 64px;
   font-weight: 800;
 }
 
@@ -147,7 +147,7 @@ h2 {
 .unlock-info {
   text-align: center;
   color: #6B7280;
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1.6;
   margin: 20px 0;
 }
@@ -166,7 +166,7 @@ h2 {
   background: none;
   border: none;
   color: #35729e;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
@@ -199,13 +199,13 @@ h2 {
   gap: 20px;
   padding: 10px 0;
   cursor: pointer;
-  font-size: 28px;
+  font-size: 32px;
   user-select: none;
 }
 
 .door-checkbox input[type="checkbox"] {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
   accent-color: #35729e;
 }
@@ -230,13 +230,13 @@ h2 {
   gap: 20px;
   padding: 10px 0;
   cursor: pointer;
-  font-size: 28px;
+  font-size: 32px;
   user-select: none;
 }
 
 .duration-option input[type="radio"] {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
   accent-color: #35729e;
 }
@@ -257,10 +257,10 @@ h2 {
 }
 
 .btn {
-  min-height: 60px;
-  min-width: 140px;
-  padding: 15px 50px;
-  font-size: 24px;
+  min-height: 70px;
+  min-width: 160px;
+  padding: 18px 56px;
+  font-size: 28px;
   font-weight: 600;
   border: none;
   border-radius: 8px;
@@ -294,10 +294,10 @@ h2 {
 }
 
 .cancel-link {
-  min-height: 60px;
-  min-width: 140px;
-  padding: 15px 50px;
-  font-size: 24px;
+  min-height: 70px;
+  min-width: 160px;
+  padding: 18px 56px;
+  font-size: 28px;
   font-weight: 600;
   border: 3px solid #b12834;
   border-radius: 8px;
@@ -333,7 +333,7 @@ h2 {
   background-color: white;
   padding: 40px 60px;
   border-radius: 12px;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: #374151;
 }
@@ -343,7 +343,7 @@ h2 {
   background: none;
   border: none;
   color: #35729e;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   cursor: pointer;
   padding: 8px 0;
@@ -360,7 +360,7 @@ h2 {
   color: #DC2626;
   padding: 20px 30px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 24px;
   text-align: center;
   max-width: 500px;
   margin: 20px 0;
@@ -390,11 +390,11 @@ h2 {
 
 .dialog-box h2 {
   margin-bottom: 20px;
-  font-size: 28px;
+  font-size: 32px;
 }
 
 .dialog-box p {
-  font-size: 20px;
+  font-size: 24px;
   color: #374151;
   margin-bottom: 30px;
   line-height: 1.5;
@@ -407,9 +407,9 @@ h2 {
 }
 
 .dialog-btn {
-  min-height: 50px;
-  padding: 12px 30px;
-  font-size: 20px;
+  min-height: 60px;
+  padding: 14px 36px;
+  font-size: 24px;
   font-weight: 600;
   border: 2px solid #000;
   border-radius: 8px;
@@ -443,7 +443,7 @@ h2 {
 }
 
 .setup-description {
-  font-size: 20px;
+  font-size: 24px;
   color: #6B7280;
   text-align: center;
   line-height: 1.6;
@@ -463,14 +463,14 @@ h2 {
 }
 
 .form-group label {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   color: #374151;
 }
 
 .form-group input {
   padding: 15px 20px;
-  font-size: 20px;
+  font-size: 24px;
   border: 2px solid #D1D5DB;
   border-radius: 8px;
   background-color: white;
@@ -491,7 +491,7 @@ h2 {
   background: none;
   border: none;
   color: #35729e;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   cursor: pointer;
   text-align: left;
@@ -523,24 +523,24 @@ h2 {
   }
 
   h1 {
-    font-size: 36px;
-  }
-
-  .status-text .status-word {
     font-size: 42px;
   }
 
+  .status-text .status-word {
+    font-size: 50px;
+  }
+
   .unlock-info {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .door-checkbox,
   .duration-option {
-    font-size: 22px;
+    font-size: 26px;
   }
 
   .btn {
-    font-size: 20px;
-    min-height: 56px;
+    font-size: 24px;
+    min-height: 64px;
   }
 }
