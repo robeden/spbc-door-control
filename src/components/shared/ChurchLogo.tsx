@@ -1,3 +1,5 @@
+import logoUrl from '/logo.png';
+
 interface ChurchLogoProps {
   className?: string;
 }
@@ -5,7 +7,7 @@ interface ChurchLogoProps {
 export function ChurchLogo({ className = '' }: ChurchLogoProps) {
   return (
     <div className={`church-logo ${className}`}>
-      <img src="/logo.png" alt="Church Logo" />
+      <img src={logoUrl} alt="Church Logo" />
     </div>
   );
 }
