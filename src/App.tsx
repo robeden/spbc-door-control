@@ -9,6 +9,19 @@ import { ConfirmDialog } from './components/shared/ConfirmDialog';
 
 type Screen = 'status' | 'doorSelect' | 'duration';
 
+function renderError(message: string, baseUrl: string) {
+  const phrase = 'site certificate';
+  const idx = message.indexOf(phrase);
+  if (idx === -1) return message;
+  return (
+    <>
+      {message.slice(0, idx)}
+      <a href={baseUrl} target="_blank" rel="noreferrer">{phrase}</a>
+      {message.slice(idx + phrase.length)}
+    </>
+  );
+}
+
 function App() {
   const [needsSetup, setNeedsSetup] = useState(!unifiAccessService.hasApiKey());
   const [screen, setScreen] = useState<Screen>('status');
@@ -201,7 +214,7 @@ function App() {
       <div className="app loading">
         {error ? (
           <>
-            <p className="error-message">{error}</p>
+            <p className="error-message">{renderError(error, unifiAccessService.getBaseUrl())}</p>
             <button className="link-button" onClick={handleAuthError}>Clear API Key</button>
           </>
         ) : (
@@ -248,7 +261,7 @@ function App() {
       )}
 
       {error && screen === 'status' && (
-        <div className="error-message">{error}</div>
+        <div className="error-message">{renderError(error, unifiAccessService.getBaseUrl())}</div>
       )}
 
       {showLockConfirm && (
